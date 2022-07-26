@@ -18,15 +18,15 @@ class GATON(nn.Module):
         self.W_seq = nn.Linear(config.num_item, config.d_model)
 
         self.conv1_seq_item = GATConv(
-            (config.d_model, config.d_model), config.d_model, config.num_head)
+            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout)
         self.conv1_item_seq = GATConv(
-            (config.d_model, config.d_model), config.d_model, config.num_head)
+            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout)
 
         hidden_size = config.num_head * config.d_model
         self.conv2_seq_item = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1)
+            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
         self.conv2_item_seq = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1)
+            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
 
     def forward(
         self,

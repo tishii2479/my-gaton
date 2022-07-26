@@ -11,17 +11,17 @@ from gaton import GATON
 class Trainer():
     def __init__(
         self,
-        data: BipartiteGraphData,  # TODO: rename to graph_data
+        graph_data: BipartiteGraphData,
         config: Config
     ):
         r'''
         Args:
-            data: bipartite data of graph structure
+            graph_data: bipartite graphdata of graph structure
             edge_weight: weight for all edges, shares index with edge_index
                 shape: (num_edges,)
             config: configs for model
         '''
-        self.data = data
+        self.graph_data = graph_data
         self.config = config
         self.model = GATON(config)
         self.optimizer = Adam(self.model.parameters(), lr=config.lr)
@@ -47,8 +47,8 @@ class Trainer():
         '''
         self.model.train()
         self.optimizer.zero_grad()
-        h_item, h_seq = self.model.forward(self.data.x_item, self.data.x_seq,
-                                           self.data.edge_index)
+        h_item, h_seq = self.model.forward(self.graph_data.x_item, self.graph_data.x_seq,
+                                           self.graph_data.edge_index)
         loss = self.loss_f(h_item, h_seq)
         loss.backward()
         self.optimizer.step()
@@ -65,8 +65,8 @@ class Trainer():
                 h_seq: (num_seq, output_dim)
         '''
         self.model.eval()
-        h_item, h_seq = self.model.forward(self.data.x_item, self.data.x_seq,
-                                           self.data.edge_index)
+        h_item, h_seq = self.model.forward(self.graph_data.x_item, self.graph_data.x_seq,
+                                           self.graph_data.edge_index)
         return h_item, h_seq
 
     def loss_f(
@@ -78,10 +78,10 @@ class Trainer():
         TODO: make loss function injectable
         '''
         loss = 0
-        for i in range(len(self.data.edge_weight)):
-            seq_idx = self.data.edge_index[0][i]
-            item_idx = self.data.edge_index[1][i]
-            n_ou = self.data.edge_weight[i]
+        for i in range(len(self.graph_data.edge_weight)):
+            seq_idx = self.graph_data.edge_index[0][i]
+            item_idx = self.graph_data.edge_index[1][i]
+            n_ou = self.graph_data.edge_weight[i]
             loss += (n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2
 
         l2_norm = sum(p.pow(2.0).sum()
