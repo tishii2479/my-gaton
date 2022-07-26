@@ -1,3 +1,4 @@
+import torch
 from torch import Tensor
 
 
@@ -29,3 +30,17 @@ class BipartiteGraphData:
         self.edge_weight = edge_weight
         self.x_item = x_item
         self.x_seq = x_seq
+
+
+def group_topics(
+    h_seq: Tensor,
+    num_topic: int
+):
+    topics = [[] for _ in range(num_topic)]
+
+    for i, h in enumerate(h_seq):
+        topic = torch.argmax(h).item()
+        topics[topic].append(i)
+        print(f'index: {i}, probability: {h}, to: {topic}')
+
+    return topics
