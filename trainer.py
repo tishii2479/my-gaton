@@ -11,7 +11,7 @@ from gaton import GATON
 class Trainer():
     def __init__(
         self,
-        data: BipartiteGraphData,
+        data: BipartiteGraphData,  # TODO: rename to graph_data
         config: Config
     ):
         r'''
@@ -26,7 +26,7 @@ class Trainer():
         self.model = GATON(config)
         self.optimizer = Adam(self.model.parameters(), lr=config.lr)
 
-    def fit(self) -> List[Tensor]:
+    def fit(self) -> List[float]:
         r'''
         Fit to graph data
         Return:
@@ -35,7 +35,7 @@ class Trainer():
         losses = []
         for epoch in range(1, self.config.epochs + 1):
             loss = self.iter()
-            losses.append(loss)
+            losses.append(loss.item())
             print(f'Epoch: {epoch}, loss: {loss}')
         return losses
 

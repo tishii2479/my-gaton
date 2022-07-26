@@ -1,20 +1,34 @@
+from typing import Any, List
 from torch import Tensor
 
+# Type alias for Item
+Item = Any
 
-class Config():
+
+class Config:
     r'''
     Configs for model, training
     '''
-    d_model = 4
+    word_embedding_dim: int
+    num_item: int
+    num_seq: int
     num_head = 4
-    word_embedding_dim = 4
-    num_item = 4
-    num_seq = 2
+    d_model = 50
     output_dim = 3
     lr = 0.002
     l2_lambda = 0.0005
     dropout = 0.6
     epochs = 3
+
+
+class Sequence:
+    def __init__(
+        self,
+        sequence,
+        indicies: List[int]
+    ):
+        self.sequence = sequence
+        self.indicies = indicies
 
 
 class BipartiteGraphData:

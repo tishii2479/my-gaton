@@ -15,7 +15,7 @@ class GATON(nn.Module):
         super().__init__()
 
         self.W_item = nn.Linear(config.word_embedding_dim, config.d_model)
-        self.W_sequment = nn.Linear(config.num_item, config.d_model)
+        self.W_seq = nn.Linear(config.num_item, config.d_model)
 
         self.conv1_seq_item = GATConv(
             (config.d_model, config.d_model), config.d_model, config.num_head)
@@ -39,7 +39,7 @@ class GATON(nn.Module):
             edge_index, 0, torch.tensor([1, 0], dtype=torch.long))
 
         h_item = self.W_item.forward(x_item)
-        h_seq = self.W_item.forward(x_seq)
+        h_seq = self.W_seq.forward(x_seq)
 
         h_item2 = self.conv1_seq_item.forward((h_seq, h_item), edge_index)
         h_seq2 = self.conv1_item_seq.forward(
