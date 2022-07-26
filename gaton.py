@@ -14,18 +14,19 @@ class GATON(nn.Module):
     ):
         super().__init__()
 
-        self.W_item = nn.Linear(config.word_embedding_dim, config.d)
-        self.W_sequment = nn.Linear(config.num_item, config.d)
+        self.W_item = nn.Linear(config.word_embedding_dim, config.d_model)
+        self.W_sequment = nn.Linear(config.num_item, config.d_model)
 
         self.conv1_seq_item = GATConv(
-            (config.d, config.d), config.d, config.num_head)
+            (config.d_model, config.d_model), config.d_model, config.num_head)
         self.conv1_item_seq = GATConv(
-            (config.d, config.d), config.d, config.num_head)
+            (config.d_model, config.d_model), config.d_model, config.num_head)
 
+        hidden_size = config.num_head * config.d_model
         self.conv2_seq_item = GATConv(
-            (config.num_head * config.d, config.num_head * config.d), config.output_dim, heads=1)
+            (hidden_size, hidden_size), config.output_dim, heads=1)
         self.conv2_item_seq = GATConv(
-            (config.num_head * config.d, config.num_head * config.d), config.output_dim, heads=1)
+            (hidden_size, hidden_size), config.output_dim, heads=1)
 
     def forward(
         self,
@@ -33,6 +34,7 @@ class GATON(nn.Module):
         x_seq: Tensor,
         edge_index: Tensor
     ):
+        # Swap rows [0, 1] to [1, 0] (=swap src and dst of `edge_index`)
         swapped_edge_index = torch.index_select(
             edge_index, 0, torch.tensor([1, 0], dtype=torch.long))
 
