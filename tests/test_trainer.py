@@ -1,10 +1,9 @@
 from trainer import Trainer
-from util import BipartiteGraphData
 import torch
 import unittest
 
 from util import group_topics
-from config import Config
+from containers import Config, BipartiteGraphData
 
 
 class TestTrainer(unittest.TestCase):

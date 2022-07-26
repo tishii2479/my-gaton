@@ -4,9 +4,8 @@ from torch import Tensor
 from torch.optim import Adam
 
 
-from config import Config
+from containers import Config, BipartiteGraphData
 from gaton import GATON
-from util import BipartiteGraphData
 
 
 class Trainer():

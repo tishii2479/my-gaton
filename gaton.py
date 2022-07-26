@@ -4,7 +4,7 @@ from torch_geometric.nn import GATConv
 import torch.nn.functional as F
 
 
-from config import Config
+from containers import Config
 
 
 class GATON(nn.Module):

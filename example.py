@@ -1,8 +1,8 @@
 import torch
 from torch import Tensor
 
-from config import Config
-from util import BipartiteGraphData, group_topics
+from containers import BipartiteGraphData, Config
+from util import group_topics
 from trainer import Trainer
 
 
@@ -15,6 +15,10 @@ def main():
         [0, 1, 2, 3],  # item index
     ])
     edge_weight = torch.tensor([0.8, 0.2, 0.3, 0.7])
+    documents = [
+        ['my', 'name', 'is', 'hello'],
+        ['a', 'b', 'c', 'd'],
+    ]
 
     x_item = torch.randn(config.num_item, config.word_embedding_dim)
     x_seq = torch.randn(config.num_seq, config.word_embedding_dim)
