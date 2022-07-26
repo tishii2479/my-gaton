@@ -1,4 +1,7 @@
 class Config():
+    r'''
+    Configs for model, training
+    '''
     d = 4
     num_head = 4
     word_embedding_dim = 4
