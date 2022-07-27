@@ -11,14 +11,14 @@ def create_toydata(num_topic: int):
     words = []
     key_words = [[] for _ in range(num_topic)]
 
-    for _ in range(1, 251):
+    for _ in range(1, 51):
         s = ''
         for _ in range(10):
             s += chr(ord('a') + randint(0, 26))
         words.append(s)
 
     for i in range(num_topic):
-        for j in range(1, 21):
+        for j in range(1, 6):
             s = chr(ord('a') + i) * j
             key_words[i].append(s)
             words.append(s)
@@ -26,13 +26,29 @@ def create_toydata(num_topic: int):
     for i in range(num_topic):
         for _ in range(20):
             doc = []
-            for _ in range(randint(100, 200)):
+            for _ in range(randint(50, 100)):
                 doc.append(choice(key_words[i]))
-            for _ in range(randint(700, 1000)):
+            for _ in range(randint(15, 20)):
                 doc.append(choice(words))
             documents.append(doc)
-    word_embedding = torch.rand(len(words), 50)
+    word_embedding = torch.eye(len(words))
 
+    return documents, (words, word_embedding)
+
+
+def main():
+    # torch.set_printoptions(sci_mode=False)
+    num_topic = 5
+    raw_sequences, (items, item_embedding) = create_toydata(num_topic)
+    graph_data, sequences, item_index_dict = preprocess(
+        raw_sequences, (items, item_embedding))
+
+    # print(graph_data.x_seq[0])
+    # print(graph_data.x_seq[20])
+    # print(graph_data.x_seq[40])
+    # print(graph_data.x_seq[60])
+    # print(graph_data.x_seq[80])
+    # print(len(graph_data.x_seq[0]))
     # print(items)
     # cnt = 0
     # for u, v in zip(graph_data.edge_index[0], graph_data.edge_index[1]):
@@ -40,23 +56,17 @@ def create_toydata(num_topic: int):
     #     cnt += 1
     # return
 
-    return documents, (words, word_embedding)
-
-
-def main():
-    num_topic = 5
-    raw_sequences, (items, item_embedding) = create_toydata(num_topic)
-    graph_data, sequences, item_index_dict = preprocess(
-        raw_sequences, (items, item_embedding))
-
     # TODO: read from command line, and initialize
     config = Config()
     config.num_item = len(items)
     config.num_seq = len(sequences)
     config.item_embedding_dim = graph_data.x_item.size(1)
-    config.epochs = 100
+    config.d_model = 300
+    config.epochs = 500
     config.output_dim = num_topic
-    config.dropout = 0
+    config.lr = 0.001
+    config.verbose = True
+    config.dropout = 0.2
 
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()

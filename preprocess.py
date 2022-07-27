@@ -77,17 +77,20 @@ def construct_graph(
 
     Return:
         edge_index, edge_weight
-            shape: 
+            shape:
                 edge_index: (2, num_edge)
                 edge_weight: (num_edges,)
     '''
     edge_dict = {}
+    max_item_count_for_seq = [0] * len(sequences)
     for seq_index, sequence in enumerate(sequences):
         for item_index in sequence.indicies:
             edge = (seq_index, item_index)
             if edge not in edge_dict:
                 edge_dict[edge] = 0
             edge_dict[edge] += 1
+            max_item_count_for_seq[seq_index] = max(
+                max_item_count_for_seq[seq_index], edge_dict[edge])
 
     edge_seq, edge_item, edge_weight = [], [], []
     for (seq_index, item_index), count in edge_dict.items():
@@ -95,6 +98,7 @@ def construct_graph(
         edge_item.append(item_index)
         # Calc frequency
         weight = count / len(sequences[seq_index].sequence)
+        # weight = count / max_item_count_for_seq[seq_index]
         edge_weight.append(weight)
 
     return [edge_seq, edge_item], edge_weight

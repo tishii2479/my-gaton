@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import torch
 from torch import Tensor
-from torch.optim import Adam
+from torch.optim import SGD
 
 
 from containers import Config, BipartiteGraphData
@@ -24,7 +24,9 @@ class Trainer():
         self.graph_data = graph_data
         self.config = config
         self.model = GATON(config)
-        self.optimizer = Adam(self.model.parameters(), lr=config.lr)
+        print(self.model.modules)
+        self.optimizer = SGD(self.model.parameters(),
+                             lr=config.lr, weight_decay=config.weight_decay)
 
     def fit(self) -> List[float]:
         r'''
@@ -78,13 +80,14 @@ class Trainer():
         TODO: make loss function injectable
         '''
         loss = 0
+        print('-' * 100)
         for i in range(len(self.graph_data.edge_weight)):
             seq_idx = self.graph_data.edge_index[0][i]
             item_idx = self.graph_data.edge_index[1][i]
             n_ou = self.graph_data.edge_weight[i]
-            if i == 0:
-                print(n_ou, torch.inner(
-                    h_item[item_idx], h_seq[seq_idx]).item())
+            if self.config.verbose and i % 300 == 0:
+                print(
+                    f'h_seq: {h_seq[seq_idx]}, n_ou: {n_ou.item()}, pred: {torch.inner(h_item[item_idx], h_seq[seq_idx]).item()}, loss: {((n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2).item()}')
             loss += (n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2
 
         l2_norm = sum(p.pow(2.0).sum()

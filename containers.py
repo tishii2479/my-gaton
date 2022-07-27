@@ -16,9 +16,11 @@ class Config:
     d_model = 50
     output_dim = 3
     lr = 0.002
+    weight_decay = 5e-4
     l2_lambda = 0.0005
     dropout = 0.6
     epochs = 3
+    verbose = False
 
 
 class Sequence:
