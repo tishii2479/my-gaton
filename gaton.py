@@ -14,7 +14,7 @@ class GATON(nn.Module):
     ):
         super().__init__()
 
-        self.W_item = nn.Linear(config.word_embedding_dim, config.d_model)
+        self.W_item = nn.Linear(config.item_embedding_dim, config.d_model)
         self.W_seq = nn.Linear(config.num_item, config.d_model)
 
         self.conv1_seq_item = GATConv(

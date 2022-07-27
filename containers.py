@@ -9,7 +9,7 @@ class Config:
     r'''
     Configs for model, training
     '''
-    word_embedding_dim: int
+    item_embedding_dim: int  # rename to item_embedding_dim
     num_item: int
     num_seq: int
     num_head = 4

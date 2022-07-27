@@ -9,6 +9,9 @@ from containers import Config, BipartiteGraphData
 class TestTrainer(unittest.TestCase):
     def test_trainer(self):
         config = Config()
+        config.item_embedding_dim = 4
+        config.num_item = 4
+        config.num_seq = 2
 
         edge_index = torch.tensor([
             [0, 0, 1, 1],  # sequence index
@@ -16,8 +19,8 @@ class TestTrainer(unittest.TestCase):
         ])
         edge_weight = torch.tensor([0.8, 0.2, 0.3, 0.7])
 
-        x_item = torch.randn(config.num_item, config.word_embedding_dim)
-        x_seq = torch.randn(config.num_seq, config.word_embedding_dim)
+        x_item = torch.randn(config.num_item, config.item_embedding_dim)
+        x_seq = torch.randn(config.num_seq, config.item_embedding_dim)
 
         data = BipartiteGraphData(edge_index, edge_weight, x_item, x_seq)
         trainer = Trainer(data, config)
