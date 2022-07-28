@@ -11,7 +11,7 @@ def create_toydata(num_topic: int):
         s = ''
         for _ in range(10):
             s += chr(ord('a') + randint(0, 26))
-        words.append(s)
+        # words.append(s)
 
     for i in range(num_topic):
         for j in range(1, 6):

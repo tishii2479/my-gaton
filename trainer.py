@@ -95,11 +95,10 @@ class Trainer():
             item_idx = self.graph_data.edge_index[1][i]
             n_ou = self.graph_data.edge_weight[i]
             pred = torch.inner(h_item[item_idx], h_seq[seq_idx])
-            if self.config.verbose and i <= 5:
+            if self.config.verbose and (i <= 5 or i >= len(self.graph_data.edge_weight) - 5):
                 print(
                     f'h_seq: {h_seq[seq_idx]}, n_ou: {n_ou.item()}, pred: {pred.item()}')
-            pred = torch.inner(h_item[item_idx], h_seq[seq_idx])
-            loss += (pred - n_ou) ** 2
+            loss += torch.sqrt((pred - n_ou) ** 2)
 
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
@@ -115,7 +114,7 @@ class Trainer():
         TODO: make loss function injectable
         '''
         loss = 0
-        print('-' * 30)
+        print('*' * 30)
         loss += F.cross_entropy(h_seq, self.graph_data.seq_labels)
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
