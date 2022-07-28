@@ -28,8 +28,8 @@ def create_toydata(num_topic: int):
             doc = []
             for _ in range(randint(50, 100)):
                 doc.append(choice(key_words[i]))
-            for _ in range(randint(15, 20)):
-                doc.append(choice(words))
+            # for _ in range(randint(15, 20)):
+            #     doc.append(choice(words))
             documents.append(doc)
     word_embedding = torch.eye(len(words))
 
@@ -43,30 +43,19 @@ def main():
     graph_data, sequences, item_index_dict = preprocess(
         raw_sequences, (items, item_embedding))
 
-    # print(graph_data.x_seq[0])
-    # print(graph_data.x_seq[20])
-    # print(graph_data.x_seq[40])
-    # print(graph_data.x_seq[60])
-    # print(graph_data.x_seq[80])
-    # print(len(graph_data.x_seq[0]))
-    # print(items)
-    # cnt = 0
-    # for u, v in zip(graph_data.edge_index[0], graph_data.edge_index[1]):
-    #     print(u.item(), items[v], graph_data.edge_weight[cnt].item())
-    #     cnt += 1
-    # return
-
     # TODO: read from command line, and initialize
-    config = Config()
-    config.num_item = len(items)
-    config.num_seq = len(sequences)
-    config.item_embedding_dim = graph_data.x_item.size(1)
-    config.d_model = 300
-    config.epochs = 500
-    config.output_dim = num_topic
-    config.lr = 0.001
-    config.verbose = True
-    config.dropout = 0.2
+    config = Config(
+        num_item=len(items),
+        num_seq=len(sequences),
+        item_embedding=graph_data.x_item.size(1),
+        d_model=300,
+        epochs=100,
+        output_dim=num_topic,
+        lr=1,
+        l2_lambda=0,
+        verbose=False,
+        dropout=0.2
+    )
 
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()
