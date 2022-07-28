@@ -2,6 +2,7 @@ from typing import List, Tuple
 import torch
 from torch import Tensor
 from torch.optim import SGD
+import torch.nn.functional as F
 
 
 from containers import Config, BipartiteGraphData
@@ -27,6 +28,8 @@ class Trainer():
         print(self.model.modules)
         self.optimizer = SGD(self.model.parameters(),
                              lr=config.lr, weight_decay=config.weight_decay)
+
+        self.loss_f = self.loss_topic_modeling if self.config.objective == 'topic-modeling' else self.loss_classification
 
     def fit(self) -> List[float]:
         r'''
@@ -71,7 +74,7 @@ class Trainer():
                                            self.graph_data.edge_index)
         return h_item, h_seq
 
-    def loss_f(
+    def loss_topic_modeling(
         self,
         h_item: Tensor,
         h_seq: Tensor
@@ -90,6 +93,22 @@ class Trainer():
                     f'h_seq: {h_seq[seq_idx]}, n_ou: {n_ou.item()}, pred: {torch.inner(h_item[item_idx], h_seq[seq_idx]).item()}, loss: {((n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2).item()}')
             loss += (n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2
 
+        l2_norm = sum(p.pow(2.0).sum()
+                      for p in self.model.parameters())
+        loss += self.config.l2_lambda * l2_norm
+        return loss
+
+    def loss_classification(
+        self,
+        h_item: Tensor,
+        h_seq: Tensor
+    ):
+        r'''
+        TODO: make loss function injectable
+        '''
+        loss = 0
+        print('-' * 100)
+        loss += F.cross_entropy(h_seq, self.graph_data.seq_label)
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
         loss += self.config.l2_lambda * l2_norm

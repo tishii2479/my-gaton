@@ -9,7 +9,7 @@ class Config:
     r'''
     Configs for model, training
     '''
-    item_embedding_dim: int  # rename to item_embedding_dim
+    item_embedding_dim: int
     num_item: int
     num_seq: int
     num_head = 4
@@ -21,6 +21,7 @@ class Config:
     dropout = 0.6
     epochs = 3
     verbose = False
+    objective = 'topic-modeling'  # topic-modeling, classification
 
 
 class Sequence:
@@ -43,7 +44,8 @@ class BipartiteGraphData:
         edge_index: Tensor,
         edge_weight: Tensor,
         x_item: Tensor,
-        x_seq: Tensor
+        x_seq: Tensor,
+        seq_label: Tensor = None
     ):
         r'''
         Args:
@@ -56,8 +58,16 @@ class BipartiteGraphData:
                 shape: (2, num_edges)
             edge_weight: weight for all edges, shares index with edge_index
                 shape: (num_edges,)
+            seq_label: label for sequence, will be set when config.objective = 'classification'
         '''
+        assert len(edge_index[0]) == len(
+            edge_weight), 'edge_index and edge_weight should have same length'
+        if seq_label is not None:
+            assert len(x_seq) == len(
+                seq_label), 'seq_label and x_seq should have same length'
+
         self.edge_index = edge_index
         self.edge_weight = edge_weight
         self.x_item = x_item
         self.x_seq = x_seq
+        self.seq_label = seq_label
