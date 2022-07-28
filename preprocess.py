@@ -17,31 +17,37 @@ def calc_seq_feature(
 
 
 def preprocess(
-    raw_sequences: List[List[Item]],
+    sequences: Tuple[List[List[Item]], List[int] | None],
     items: List[Tuple[Item, Tensor]]
 ) -> Tuple[BipartiteGraphData, List[Sequence], List[Item], dict[Item, int]]:
     r'''
     Preprocess data
 
     Args:
-        sequences: raw representation of sequences, should be list of Item
+        sequences: 
+            tuple of raw representation of sequences, and target label
+            target label is None when the task is topic-modeling
         items:
             tuple of Item, and tensor of item embedding
-
     Return:
         graph_data, sequences, items, item_index_dict
     '''
+    raw_sequences, seq_labels = sequences
     item_list, x_item = items
     sequences, item_index_dict = preprocess_sequences(raw_sequences, item_list)
     edge_index, edge_weight = construct_graph(sequences)
 
     x_seq = calc_seq_feature(sequences, len(item_list))
 
+    if seq_labels is not None:
+        seq_labels = torch.tensor(seq_labels, dtype=torch.long)
+
     graph_data = BipartiteGraphData(
         torch.tensor(edge_index, dtype=torch.long),
         torch.Tensor(edge_weight),
         x_item,
-        x_seq
+        x_seq,
+        seq_labels
     )
 
     return graph_data, sequences, item_index_dict
@@ -97,6 +103,7 @@ def construct_graph(
         edge_seq.append(seq_index)
         edge_item.append(item_index)
         # Calc frequency
+        # TODO: inject weight function
         weight = count / len(sequences[seq_index].sequence)
         # weight = count / max_item_count_for_seq[seq_index]
         edge_weight.append(weight)

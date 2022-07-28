@@ -29,7 +29,12 @@ class Trainer():
         self.optimizer = SGD(self.model.parameters(),
                              lr=config.lr, weight_decay=config.weight_decay)
 
-        self.loss_f = self.loss_topic_modeling if self.config.objective == 'topic-modeling' else self.loss_classification
+        if self.config.objective == 'topic-modeling':
+            self.loss_f = self.loss_topic_modeling
+        elif self.config.objective == 'classification':
+            self.loss_f = self.loss_classification
+        else:
+            Exception
 
     def fit(self) -> List[float]:
         r'''
@@ -81,9 +86,10 @@ class Trainer():
     ):
         r'''
         TODO: make loss function injectable
+        TODO: use better matrix calculation
         '''
         loss = 0
-        print('-' * 100)
+        print('-' * 30)
         for i in range(len(self.graph_data.edge_weight)):
             seq_idx = self.graph_data.edge_index[0][i]
             item_idx = self.graph_data.edge_index[1][i]
@@ -107,8 +113,8 @@ class Trainer():
         TODO: make loss function injectable
         '''
         loss = 0
-        print('-' * 100)
-        loss += F.cross_entropy(h_seq, self.graph_data.seq_label)
+        print('-' * 30)
+        loss += F.cross_entropy(h_seq, self.graph_data.seq_labels)
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
         loss += self.config.l2_lambda * l2_norm

@@ -45,7 +45,7 @@ class BipartiteGraphData:
         edge_weight: Tensor,
         x_item: Tensor,
         x_seq: Tensor,
-        seq_label: Tensor = None
+        seq_labels: Tensor = None
     ):
         r'''
         Args:
@@ -58,16 +58,16 @@ class BipartiteGraphData:
                 shape: (2, num_edges)
             edge_weight: weight for all edges, shares index with edge_index
                 shape: (num_edges,)
-            seq_label: label for sequence, will be set when config.objective = 'classification'
+            seq_labels: label for sequence, will be set when config.objective = 'classification'
         '''
         assert len(edge_index[0]) == len(
             edge_weight), 'edge_index and edge_weight should have same length'
-        if seq_label is not None:
+        if seq_labels is not None:
             assert len(x_seq) == len(
-                seq_label), 'seq_label and x_seq should have same length'
+                seq_labels), f'seq_labels: {len(seq_labels)} and x_seq: {len(x_seq)} should have same length'
 
         self.edge_index = edge_index
         self.edge_weight = edge_weight
         self.x_item = x_item
         self.x_seq = x_seq
-        self.seq_label = seq_label
+        self.seq_labels = seq_labels
