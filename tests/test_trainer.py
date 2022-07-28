@@ -54,7 +54,7 @@ class TestTrainer(unittest.TestCase):
         trainer.fit()
 
         _, h_seq = trainer.eval()
-        topics = group_topics(h_seq, num_topic=config.output_dim)
+        topics = group_topics(h_seq, num_topic=config.num_topic)
         print(topics)
 
 

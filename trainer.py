@@ -71,12 +71,12 @@ class Trainer():
         Return:
             (h_item, h_seq)
             shape: 
-                h_item: (num_item, output_dim)
-                h_seq: (num_seq, output_dim)
+                h_item: (num_item, num_topic)
+                h_seq: (num_seq, num_topic)
         '''
         self.model.eval()
-        h_item, h_seq = self.model.forward(self.graph_data.x_item, self.graph_data.x_seq,
-                                           self.graph_data.edge_index)
+        h_item, h_seq = self.model.calc_probability(self.graph_data.x_item, self.graph_data.x_seq,
+                                                    self.graph_data.edge_index)
         return h_item, h_seq
 
     def loss_topic_modeling(

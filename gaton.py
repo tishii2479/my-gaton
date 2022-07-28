@@ -14,8 +14,9 @@ class GATON(nn.Module):
     ):
         super().__init__()
 
-        self.W_item = nn.Linear(config.item_embedding_dim, config.d_model)
-        self.W_seq = nn.Linear(config.num_item, config.d_model)
+        self.W_item = nn.Linear(config.item_embedding_dim,
+                                config.d_model, bias=False)
+        self.W_seq = nn.Linear(config.num_item, config.d_model, bias=False)
 
         self.conv1_seq_item = GATConv(
             (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout)
@@ -24,11 +25,29 @@ class GATON(nn.Module):
 
         hidden_size = config.num_head * config.d_model
         self.conv2_seq_item = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
+            (hidden_size, hidden_size), config.num_topic, heads=1, dropout=config.dropout)
         self.conv2_item_seq = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
+            (hidden_size, hidden_size), config.num_topic, heads=1, dropout=config.dropout)
+
+        self.output_layer = nn.Linear(config.num_topic, config.output_dim)
 
     def forward(
+        self,
+        x_item: Tensor,
+        x_seq: Tensor,
+        edge_index: Tensor
+    ):
+        h_item, h_seq = self.calc_probability(x_item, x_seq, edge_index)
+
+        h_item = self.output_layer.forward(h_item)
+        h_seq = self.output_layer.forward(h_seq)
+
+        h_item = F.sigmoid(h_item)
+        h_seq = F.sigmoid(h_seq)
+
+        return h_item, h_seq
+
+    def calc_probability(
         self,
         x_item: Tensor,
         x_seq: Tensor,
