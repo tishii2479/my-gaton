@@ -27,7 +27,7 @@ class Model(nn.Module):
 
 
 def create_toydata(
-    topic_num: int,
+    num_topic: int,
     min_data: int,
     max_data: int,
     threshold: float = 0.8
@@ -35,12 +35,12 @@ def create_toydata(
     data_size = []
     data = []
     labels = []
-    for topic in range(topic_num):
+    for topic in range(num_topic):
         size = randint(min_data, max_data)
         data_size.append(size)
         for _ in range(size):
-            vec = [0] * topic_num
-            for i in range(topic_num):
+            vec = [0] * num_topic
+            for i in range(num_topic):
                 if i == topic:
                     vec[i] = random() * 0.2 + threshold
                 else:
@@ -51,14 +51,14 @@ def create_toydata(
     return torch.tensor(data), torch.tensor(labels)
 
 
-topic_num = 5
+num_topic = 5
 min_data, max_data = 10, 10
 
-data, labels = create_toydata(topic_num, min_data, max_data)
-test_data, test_labels = create_toydata(topic_num, 5, 5, 0.6)
+data, labels = create_toydata(num_topic, min_data, max_data)
+test_data, test_labels = create_toydata(num_topic, 5, 5, 0.6)
 
 hidden_dim = 30
-model = Model(topic_num, hidden_dim, topic_num)
+model = Model(num_topic, hidden_dim, num_topic)
 optimizer = torch.optim.SGD(model.parameters(), lr=1)
 
 epochs = 100000

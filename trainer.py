@@ -94,10 +94,12 @@ class Trainer():
             seq_idx = self.graph_data.edge_index[0][i]
             item_idx = self.graph_data.edge_index[1][i]
             n_ou = self.graph_data.edge_weight[i]
-            if self.config.verbose and i % 300 == 0:
+            pred = torch.inner(h_item[item_idx], h_seq[seq_idx])
+            if self.config.verbose and i <= 5:
                 print(
-                    f'h_seq: {h_seq[seq_idx]}, n_ou: {n_ou.item()}, pred: {torch.inner(h_item[item_idx], h_seq[seq_idx]).item()}, loss: {((n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2).item()}')
-            loss += (n_ou - torch.inner(h_item[item_idx], h_seq[seq_idx])) ** 2
+                    f'h_seq: {h_seq[seq_idx]}, n_ou: {n_ou.item()}, pred: {pred.item()}')
+            pred = torch.inner(h_item[item_idx], h_seq[seq_idx])
+            loss += (pred - n_ou) ** 2
 
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
@@ -106,7 +108,7 @@ class Trainer():
 
     def loss_classification(
         self,
-        h_item: Tensor,
+        _: Tensor,
         h_seq: Tensor
     ):
         r'''

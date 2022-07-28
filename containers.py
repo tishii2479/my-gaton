@@ -13,8 +13,9 @@ class Config:
     num_item: int
     num_seq: int
     num_head = 4
+    num_topic = 5
     d_model = 50
-    output_dim = 3
+    output_dim = 5
     lr = 0.002
     weight_decay = 5e-4
     l2_lambda = 0.0005

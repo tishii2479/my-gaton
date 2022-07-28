@@ -22,7 +22,7 @@ def create_toydata(num_topic: int):
     for i in range(num_topic):
         for _ in range(5):
             doc = []
-            for _ in range(randint(50, 100)):
+            for _ in range(randint(20, 40)):
                 doc.append(choice(key_words[i]))
             # for _ in range(randint(15, 20)):
             #     doc.append(choice(words))
