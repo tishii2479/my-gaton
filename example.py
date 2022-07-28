@@ -1,3 +1,5 @@
+import argparse
+
 from containers import Config
 from util import group_topics, top_topic_items
 from trainer import Trainer
@@ -18,31 +20,48 @@ def get_data(objective: str, num_topic: int):
     return (raw_sequences, seq_label), (items, item_embedding)
 
 
-def main():
-    # TODO: read from command line
-    objective = 'topic-modeling'
-    num_topic = 5
+def read_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--heads', type=int, default=4)
+    parser.add_argument('--d_model', type=int, default=50)
+    parser.add_argument('--num_topic', type=int, default=5)
+    parser.add_argument('--lr', type=float, default=0.005)
+    parser.add_argument('--dropout', type=float, default=0.2)
+    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--verbose', type=bool, default=False)
+    parser.add_argument('--l2_lambda', type=bool, default=False)
+    parser.add_argument('--objective', type=str, default='topic-modeling')
 
+    return parser.parse_args()
+
+
+def read_config() -> Config:
+    args = read_args()
+    config = Config()
+    config.d_model = args.d_model
+    config.epochs = args.epochs
+    config.output_dim = args.num_topic
+    config.num_topic = args.num_topic
+    config.num_head = args.heads
+    config.lr = args.lr
+    config.verbose = args.verbose
+    config.dropout = args.dropout
+    config.l2_lambda = args.l2_lambda
+    config.objective = args.objective
+    return config
+
+
+def main():
+    config = read_config()
     (raw_sequences, seq_label), (items,
-                                 item_embedding) = get_data(objective, num_topic)
+                                 item_embedding) = get_data(config.objective, config.num_topic)
 
     graph_data, sequences, _ = preprocess(
         (raw_sequences, seq_label), (items, item_embedding))
 
-    # TODO: read from command line, and initialize
-    config = Config()
     config.num_item = len(items)
     config.num_seq = len(sequences)
     config.item_embedding_dim = graph_data.x_item.size(1)
-    config.d_model = 300
-    config.epochs = 2000
-    config.output_dim = 50
-    config.num_topic = num_topic
-    config.lr = 0.002
-    config.verbose = False
-    config.dropout = 0.2
-    config.l2_lambda = 0
-    config.objective = objective
 
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()
