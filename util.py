@@ -102,6 +102,16 @@ def top_cluster_items(
     return top_items
 
 
+def visualize_loss(
+    losses: List[float]
+):
+    r'''
+    Visualize loss curve
+    '''
+    plt.plot(losses)
+    plt.show()
+
+
 def visualize_cluster(
     features: List[Tensor],
     num_cluster: int,

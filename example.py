@@ -1,7 +1,7 @@
 import argparse
 
 from containers import Config
-from util import top_cluster_items, visualize_cluster, group_topics
+from util import top_cluster_items, visualize_cluster, group_topics, visualize_loss
 from trainer import Trainer
 from preprocess import preprocess
 
@@ -66,9 +66,10 @@ def main():
 
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()
-    h_item, h_seq = trainer.eval()
+    _, h_seq = trainer.eval()
 
     cluster_labels = group_topics(h_seq, config.num_topic)
+    print(cluster_labels)
 
     top_items = top_cluster_items(
         config.num_topic, cluster_labels, sequences, num_top_item=5, num_item=config.num_item)
@@ -78,6 +79,7 @@ def main():
               ' '.join([items[index] for index in top_items_for_topic]))
     print(losses[-1])
 
+    visualize_loss(losses)
     visualize_cluster(h_seq, config.num_topic, cluster_labels)
 
 
