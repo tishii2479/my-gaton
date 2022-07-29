@@ -6,27 +6,31 @@ def create_toydata(num_topic: int):
     documents = []
     words = []
     key_words = [[] for _ in range(num_topic)]
+    data_size = 20
 
-    for _ in range(1, 51):
-        s = ''
-        for _ in range(10):
-            s += chr(ord('a') + randint(0, 26))
-        # words.append(s)
+    # for _ in range(1, 51):
+    #     s = ''
+    #     for _ in range(10):
+    #         s += chr(ord('a') + randint(0, 26))
+    #     words.append(s)
 
     for i in range(num_topic):
-        for j in range(1, 6):
+        for j in range(1, 11):
             s = chr(ord('a') + i) * j
             key_words[i].append(s)
-            words.append(s)
 
     for i in range(num_topic):
-        for _ in range(5):
+        for _ in range(data_size):
             doc = []
             for _ in range(randint(20, 40)):
                 doc.append(choice(key_words[i]))
-            # for _ in range(randint(15, 20)):
+            # for _ in range(randint(150, 200)):
             #     doc.append(choice(words))
             documents.append(doc)
+
+    for i in range(num_topic):
+        words += key_words[i]
+
     word_embedding = torch.eye(len(words))
 
     return (documents, None), (words, word_embedding)

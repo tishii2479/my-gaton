@@ -1,11 +1,13 @@
 import argparse
 
 from containers import Config
-from util import group_topics, top_topic_items
+from util import top_cluster_items, visualize_cluster
 from trainer import Trainer
 from preprocess import preprocess
 
 from toydata import create_labeled_toydata, create_toydata
+
+from sklearn.cluster import KMeans
 
 
 def get_data(objective: str, num_topic: int):
@@ -24,9 +26,10 @@ def read_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--heads', type=int, default=4)
     parser.add_argument('--d_model', type=int, default=50)
-    parser.add_argument('--num_topic', type=int, default=5)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--dropout', type=float, default=0.2)
+    parser.add_argument('--num_topic', type=int, default=10)
+    parser.add_argument('--output_dim', type=int, default=10)
+    parser.add_argument('--lr', type=float, default=0.0002)
+    parser.add_argument('--dropout', type=float, default=0.6)
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--l2_lambda', type=float, default=0)
@@ -40,7 +43,7 @@ def read_config() -> Config:
     config = Config()
     config.d_model = args.d_model
     config.epochs = args.epochs
-    config.output_dim = args.num_topic
+    config.output_dim = args.output_dim
     config.num_topic = args.num_topic
     config.num_head = args.heads
     config.lr = args.lr
@@ -66,18 +69,21 @@ def main():
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()
     h_item, h_seq = trainer.eval()
-    topics = group_topics(h_seq, num_topic=config.num_topic)
-    top_items = top_topic_items(
-        topics, sequences, num_top_item=5, num_item=config.num_item)
 
-    print('item embedding')
-    _ = group_topics(h_item, num_topic=config.num_topic)
+    kmeans = KMeans(n_clusters=config.num_topic)
+    kmeans.fit(h_seq)
 
-    print(topics)
+    cluster_labels = kmeans.labels_
+
+    top_items = top_cluster_items(
+        config.num_topic, cluster_labels, sequences, num_top_item=5, num_item=config.num_item)
+
     for topic, top_items_for_topic in enumerate(top_items):
         print(f'Top items for topic {topic}: ' +
               ' '.join([items[index] for index in top_items_for_topic]))
     print(losses[-1])
+
+    visualize_cluster(h_seq, config.num_topic, cluster_labels)
 
 
 if __name__ == '__main__':
