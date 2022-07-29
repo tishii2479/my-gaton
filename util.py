@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import torch
 from torch import Tensor
 import numpy as np
@@ -74,7 +74,7 @@ def top_cluster_items(
     sequences: List[Sequence],
     num_top_item: int,
     num_item: int
-) -> List[List[int]]:
+) -> List[Tuple[List[int], List[float]]]:
     r'''
     Args:
         num_cluster: number of clusters
@@ -88,17 +88,20 @@ def top_cluster_items(
             shape: (num_topic, num_top_item)
     '''
     item_counts = np.zeros((num_cluster, num_item))
-
+    cluster_size = [0] * num_cluster
     for i, sequence in enumerate(sequences):
-        for item_index in sequence.indicies:
+        cluster_size[cluster_labels[i]] += 1
+        for item_index in set(sequence.indicies):
             item_counts[cluster_labels[i]][item_index] += 1
 
     top_items = []
-    for topic in range(num_cluster):
+    for cluster in range(num_cluster):
         # Get item index of top `num_top_item` items which has larget item_count
-        top_items_for_topic = list(
-            item_counts[topic].argsort()[::-1][:num_top_item])
-        top_items.append(top_items_for_topic)
+        top_items_for_cluster = list(
+            item_counts[cluster].argsort()[::-1][:num_top_item])
+        top_items_for_cluster_counts = list(
+            np.sort(item_counts[cluster])[::-1][:num_top_item] / cluster_size[cluster])
+        top_items.append((top_items_for_cluster, top_items_for_cluster_counts))
     return top_items
 
 
@@ -133,3 +136,15 @@ def visualize_cluster(
                     color=colors[cluster_labels[i]])
 
     plt.show()
+
+
+def create_target_labels(
+    edge_index: Tensor,
+    edge_weight: Tensor,
+    num_seq: int,
+    num_item: int
+) -> Tensor:
+    target_labels = torch.zeros((num_seq, num_item), requires_grad=False)
+    for seq_index, item_index, edge_weight in zip(edge_index[0], edge_index[1], edge_weight):
+        target_labels[seq_index][item_index] = edge_weight
+    return target_labels

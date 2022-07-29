@@ -91,9 +91,9 @@ def main():
     top_items = top_cluster_items(
         config.num_topic, cluster_labels, sequences, num_top_item=10, num_item=config.num_item)
 
-    for topic, top_items_for_topic in enumerate(top_items):
-        print(f'Top items for cluster {topic} (size {seq_cnt[topic]}) : \n' +
-              '\n'.join([str(items[index]) for index in top_items_for_topic]))
+    for cluster, (top_items, ratios) in enumerate(top_items):
+        print(f'Top items for cluster {cluster} (size {seq_cnt[cluster]}): \n' +
+              '\n'.join([str(items[top_items[index]]) + ' ' + str(ratios[index]) for index in range(10)]))
         print()
     print(losses[-1])
 
