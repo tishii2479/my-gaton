@@ -30,9 +30,9 @@ class Trainer():
         self.optimizer = Adam(self.model.parameters(),
                               lr=config.lr, weight_decay=config.weight_decay)
 
-        if self.config.objective == 'topic-modeling':
+        if self.config.task == 'topic-modeling':
             self.loss_f = self.loss_topic_modeling
-        elif self.config.objective == 'classification':
+        elif self.config.task == 'classification':
             self.loss_f = self.loss_classification
         else:
             Exception

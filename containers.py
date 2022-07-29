@@ -22,7 +22,8 @@ class Config:
     dropout = 0.6
     epochs = 3
     verbose = False
-    objective = 'topic-modeling'  # topic-modeling, classification
+    task = 'topic-modeling'  # topic-modeling, classification
+    dataset = 'toydata'
 
 
 class Sequence:
@@ -59,7 +60,7 @@ class BipartiteGraphData:
                 shape: (2, num_edges)
             edge_weight: weight for all edges, shares index with edge_index
                 shape: (num_edges,)
-            seq_labels: label for sequence, will be set when config.objective = 'classification'
+            seq_labels: label for sequence, will be set when config.task = 'classification'
         '''
         assert len(edge_index[0]) == len(
             edge_weight), 'edge_index and edge_weight should have same length'

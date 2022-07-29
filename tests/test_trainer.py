@@ -27,8 +27,6 @@ class TestTrainer(unittest.TestCase):
         trainer.fit()
 
         _, h_seq = trainer.eval()
-        topics = group_topics(h_seq, num_topic=config.output_dim)
-        print(topics)
 
     def test_classification(self):
         config = Config()

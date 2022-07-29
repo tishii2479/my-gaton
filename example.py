@@ -6,18 +6,29 @@ from trainer import Trainer
 from preprocess import preprocess
 
 from toydata import create_labeled_toydata, create_toydata
+from realdata import create_movielens_data
 
 
-def get_data(objective: str, num_topic: int):
-    if objective == 'topic-modeling':
-        (raw_sequences, seq_labels), (items,
-                                      item_embedding) = create_toydata(num_topic)
-    elif objective == 'classification':
-        (raw_sequences, seq_labels), (items, item_embedding) = create_labeled_toydata(
-            num_topic)
-    else:
-        Exception
-    return (raw_sequences, seq_labels), (items, item_embedding)
+def get_data(
+    dataset: str,
+    task: str,
+    num_topic: int
+):
+    r'''
+    Return: 
+        (raw_sequences, seq_labels), (items, item_embedding)
+        info: seq_labels is None when solving topic-modeling dataset
+    '''
+    if dataset == 'movielens':
+        return create_movielens_data()
+    elif dataset == 'toydata':
+        if task == 'topic-modeling':
+            return create_toydata(num_topic)
+        elif task == 'classification':
+            return create_labeled_toydata(num_topic)
+
+    print(f'dataset: {dataset}, task: {task} is invalid')
+    Exception
 
 
 def read_args():
@@ -31,7 +42,8 @@ def read_args():
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--l2_lambda', type=float, default=0)
-    parser.add_argument('--objective', type=str, default='topic-modeling')
+    parser.add_argument('--task', type=str, default='topic-modeling')
+    parser.add_argument('--dataset', type=str, default='toydata')
 
     return parser.parse_args()
 
@@ -48,14 +60,15 @@ def read_config() -> Config:
     config.verbose = args.verbose
     config.dropout = args.dropout
     config.l2_lambda = args.l2_lambda
-    config.objective = args.objective
+    config.task = args.task
+    config.dataset = args.dataset
     return config
 
 
 def main():
     config = read_config()
     (raw_sequences, seq_labels), (items,
-                                  item_embedding) = get_data(config.objective, config.num_topic)
+                                  item_embedding) = get_data(config.dataset, config.task, config.num_topic)
 
     graph_data, sequences, _ = preprocess(
         (raw_sequences, seq_labels), (items, item_embedding))
@@ -71,12 +84,17 @@ def main():
     cluster_labels = group_topics(h_seq, config.num_topic)
     print(cluster_labels)
 
+    seq_cnt = [0] * config.num_seq
+    for e in cluster_labels:
+        seq_cnt[e] += 1
+
     top_items = top_cluster_items(
-        config.num_topic, cluster_labels, sequences, num_top_item=5, num_item=config.num_item)
+        config.num_topic, cluster_labels, sequences, num_top_item=10, num_item=config.num_item)
 
     for topic, top_items_for_topic in enumerate(top_items):
-        print(f'Top items for topic {topic}: ' +
-              ' '.join([items[index] for index in top_items_for_topic]))
+        print(f'Top items for cluster {topic} (size {seq_cnt[topic]}) : \n' +
+              '\n'.join([str(items[index]) for index in top_items_for_topic]))
+        print()
     print(losses[-1])
 
     visualize_loss(losses)
