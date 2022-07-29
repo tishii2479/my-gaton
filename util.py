@@ -7,6 +7,7 @@ from containers import Sequence
 
 import numpy as np
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -27,16 +28,10 @@ def group_topics(
         list of sequence indicies for each topic
         shape: (num_topic, len(sequence_indicies))
     '''
-    topic_indicies = [[] for _ in range(num_topic)]
+    kmeans = KMeans(n_clusters=num_topic)
+    kmeans.fit(h_seq)
 
-    for i, h in enumerate(h_seq):
-        # TODO: Make 'how to choose' function injectable
-        # NOTE: it is now `argmax(h)`
-        topic = torch.argmax(h).item()
-        topic_indicies[topic].append(i)
-        print(f'index: {i}, probability: {h}, to: {topic}')
-
-    return topic_indicies
+    return kmeans.labels_
 
 
 def top_topic_items(
@@ -119,9 +114,8 @@ def visualize_cluster(
     pca.fit(features)
     pca_features = pca.fit_transform(features)
 
-    print(pca_features)
-
     colors = cm.rainbow(np.linspace(0, 1, num_cluster))
+
     plt.figure()
 
     for i in range(pca_features.shape[0]):

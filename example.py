@@ -1,13 +1,11 @@
 import argparse
 
 from containers import Config
-from util import top_cluster_items, visualize_cluster
+from util import top_cluster_items, visualize_cluster, group_topics
 from trainer import Trainer
 from preprocess import preprocess
 
 from toydata import create_labeled_toydata, create_toydata
-
-from sklearn.cluster import KMeans
 
 
 def get_data(objective: str, num_topic: int):
@@ -70,10 +68,7 @@ def main():
     losses = trainer.fit()
     h_item, h_seq = trainer.eval()
 
-    kmeans = KMeans(n_clusters=config.num_topic)
-    kmeans.fit(h_seq)
-
-    cluster_labels = kmeans.labels_
+    cluster_labels = group_topics(h_seq, config.num_topic)
 
     top_items = top_cluster_items(
         config.num_topic, cluster_labels, sequences, num_top_item=5, num_item=config.num_item)
