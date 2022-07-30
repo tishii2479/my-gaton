@@ -146,5 +146,6 @@ def create_target_labels(
 ) -> Tensor:
     target_labels = torch.zeros((num_seq, num_item), requires_grad=False)
     for seq_index, item_index, edge_weight in zip(edge_index[0], edge_index[1], edge_weight):
-        target_labels[seq_index][item_index] = edge_weight
+        # subtract num_item from seq_index to consider offset
+        target_labels[seq_index - num_item][item_index] = edge_weight
     return target_labels

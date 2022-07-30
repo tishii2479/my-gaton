@@ -35,7 +35,7 @@ def preprocess(
     raw_sequences, seq_labels = sequences
     item_list, x_item = items
     sequences, item_index_dict = preprocess_sequences(raw_sequences, item_list)
-    edge_index, edge_weight = construct_graph(sequences)
+    edge_index, edge_weight = construct_graph(sequences, len(item_list))
 
     x_seq = calc_seq_feature(sequences, len(item_list))
 
@@ -76,7 +76,8 @@ def preprocess_sequences(
 
 
 def construct_graph(
-    sequences: List[Sequence]
+    sequences: List[Sequence],
+    num_item: int
 ) -> Tuple[List[List[int]], List[int]]:
     r'''
     Construct graph from sequences
@@ -100,7 +101,7 @@ def construct_graph(
 
     edge_seq, edge_item, edge_weight = [], [], []
     for (seq_index, item_index), count in edge_dict.items():
-        edge_seq.append(seq_index)
+        edge_seq.append(seq_index + num_item)  # add offset for sequence index
         edge_item.append(item_index)
         # Calc frequency
         # TODO: inject weight function

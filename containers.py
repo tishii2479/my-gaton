@@ -14,6 +14,7 @@ class Config:
     num_seq: int
     num_head = 4
     num_topic = 5
+    num_layer = 2
     d_model = 50
     output_dim = 5
     lr = 0.002

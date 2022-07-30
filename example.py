@@ -42,6 +42,7 @@ def read_args():
     parser.add_argument('--heads', type=int, default=4)
     parser.add_argument('--d_model', type=int, default=50)
     parser.add_argument('--num_topic', type=int, default=10)
+    parser.add_argument('--num_layer', type=int, default=2)
     parser.add_argument('--output_dim', type=int, default=10)
     parser.add_argument('--lr', type=float, default=0.0002)
     parser.add_argument('--dropout', type=float, default=0.6)
@@ -62,6 +63,7 @@ def read_config() -> Config:
     config.epochs = args.epochs
     config.output_dim = args.output_dim
     config.num_topic = args.num_topic
+    config.num_layer = args.num_layer
     config.num_head = args.heads
     config.lr = args.lr
     config.verbose = args.verbose
