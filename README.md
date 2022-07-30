@@ -8,6 +8,12 @@ https://yangliang.github.io/pdf/www20.pdf
 pip3 install --no-binary torch-cluster torch-geometric  torch-scatter torch-spline-conv torch-sparse
 ```
 
+### Commands
+
+```shell
+python3 example.py --epochs=100 --num_topic=10 --d_model=200 --output_dim=30 --dataset=toydata --model=gaton --num_layer=2
+```
+
 ### Links
 
 #### Citations
