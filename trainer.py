@@ -26,7 +26,9 @@ class Trainer():
         self.graph_data = graph_data
         self.config = config
         self.model = GATON(config)
+        self.best_model_path = 'weights/gaton.pt'
         print(self.model.modules)
+
         self.optimizer = Adam(self.model.parameters(),
                               lr=config.lr, weight_decay=config.weight_decay)
 
@@ -51,10 +53,19 @@ class Trainer():
             list of loss for all epochs
         '''
         losses = []
+        best_loss = 1e10
+
         for epoch in range(1, self.config.epochs + 1):
-            loss = self.iter()
-            losses.append(loss.item())
+            loss = self.iter().item()
+            losses.append(loss)
             print(f'Epoch: {epoch}, loss: {loss}')
+            if loss < best_loss:
+                best_loss = loss
+                torch.save(self.model.state_dict(), self.best_model_path)
+
+        # Use best model
+        losses.append(best_loss)
+        self.model.load_state_dict(torch.load(self.best_model_path))
         return losses
 
     def iter(self) -> Tensor:
@@ -82,6 +93,7 @@ class Trainer():
                 h_item: (num_item, output_dim)
                 h_seq: (num_seq, output_dim)
         '''
+        self.model.load_state_dict(torch.load(self.best_model_path))
         self.model.eval()
         h_item, h_seq = self.model.forward(self.graph_data.x_item, self.graph_data.x_seq,
                                            self.graph_data.edge_index)
@@ -99,12 +111,7 @@ class Trainer():
         loss = 0
         print('-' * 30)
         pred = F.softmax(torch.matmul(h_seq, h_item.T), dim=1)
-        mat_size = len(h_seq) * len(h_item)
-        for i in range(400):
-            if self.target_labels[0][i] > 0.1:
-                print(self.target_labels[0][i], pred[0][i])
-        loss += torch.sum(torch.sqrt(
-            (self.target_labels - pred) ** 2 + 1e-7)) / mat_size
+        loss += torch.sqrt(F.mse_loss(pred, self.target_labels))
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
         loss += self.config.l2_lambda * l2_norm

@@ -4,7 +4,6 @@ from typing import List, Tuple
 
 from sklearn.decomposition import NMF
 from torch import Tensor
-import torch
 
 from containers import BipartiteGraphData, Config
 from util import create_target_labels, top_cluster_items, visualize_cluster, group_topics, visualize_loss
@@ -12,7 +11,7 @@ from trainer import Trainer
 from preprocess import preprocess
 
 from toydata import create_labeled_toydata, create_toydata
-from realdata import create_movielens_data
+from realdata import create_hm_data, create_movielens_data
 
 
 def get_data(
@@ -32,6 +31,8 @@ def get_data(
             return create_toydata(num_topic)
         elif task == 'classification':
             return create_labeled_toydata(num_topic)
+    elif dataset == 'hm':
+        return create_hm_data()
     else:
         assert False, f'dataset: {dataset}, task: {task} is invalid'
 
@@ -84,6 +85,25 @@ def train_gaton(
     trainer = Trainer(graph_data, config)
     losses = trainer.fit()
     h_item, h_seq = trainer.eval()
+
+    # print matrix
+    # target_labels = create_target_labels(
+    #     graph_data.edge_index,
+    #     graph_data.edge_weight,
+    #     config.num_seq,
+    #     config.num_item
+    # )
+    # import numpy as np
+    # import torch
+    # import torch.nn.functional as F
+    # np.set_printoptions(edgeitems=50, suppress=True)
+    # pred = np.array(F.softmax(torch.matmul(h_seq, h_item.T), dim=1))
+    # target = np.array(target_labels)
+    # print(pred[0:3])
+    # print(target[0:3])
+    # mean_error = np.mean(np.abs(pred - target))
+    # print(mean_error)
+
     return h_item, h_seq, losses
 
 
@@ -109,7 +129,13 @@ def train_nmf(
     mat_size = (len(h_seq) * len(h_item))
     mean_reconstruction_err = model.reconstruction_err_ / mat_size
 
-    print(mean_reconstruction_err)
+    # print matrix
+    # import numpy as np
+    # np.set_printoptions(edgeitems=10, suppress=True)
+    # print(np.dot(h_seq, h_item)[0:3])
+    # print(np.array(target_labels)[0:3])
+    # print(mean_reconstruction_err)
+
     return h_item, h_seq, [mean_reconstruction_err]
 
 
@@ -155,11 +181,22 @@ def main():
     top_items = top_cluster_items(
         config.num_topic, cluster_labels, sequences, num_top_item=10, num_item=config.num_item)
 
+    # TODO: refactor
+    # if h&m
+    # import pandas as pd
+    # items_df = pd.read_csv('data/hm/items.csv', dtype={'article_id': str})
+
     for cluster, (top_items, ratios) in enumerate(top_items):
-        print(f'Top items for cluster {cluster} (size {seq_cnt[cluster]}): \n' +
-              '\n'.join([str(items[top_items[index]]) + ' ' + str(ratios[index]) for index in range(10)]))
+        print(f'Top items for cluster {cluster} (size {seq_cnt[cluster]}): \n')
+        for index in range(10):
+            # TODO: refactor
+            # if h&m
+            # name = str(items_df[items_df.article_id ==
+            #            items[top_items[index]]].name)
+            name = items[top_items[index]]
+            print(name + ' ' + str(ratios[index]))
         print()
-    print(losses[-1])
+    print('loss:', losses[-1])
 
     visualize_loss(losses)
     visualize_cluster(h_seq, config.num_topic, cluster_labels)

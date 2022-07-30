@@ -19,17 +19,17 @@ class GATON(nn.Module):
         self.W_seq = nn.Linear(config.num_item, config.d_model, bias=False)
 
         self.conv1_seq_item = GATConv(
-            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout)
+            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout, concat=False)
         self.conv1_item_seq = GATConv(
-            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout)
+            (config.d_model, config.d_model), config.d_model, config.num_head, dropout=config.dropout, concat=False)
 
-        hidden_size = config.num_head * config.d_model
+        hidden_size = config.d_model
         self.batch_norm1 = nn.BatchNorm1d(hidden_size, affine=False)
 
         self.conv2_seq_item = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
+            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout, concat=False)
         self.conv2_item_seq = GATConv(
-            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout)
+            (hidden_size, hidden_size), config.output_dim, heads=1, dropout=config.dropout, concat=False)
 
         self.batch_norm2 = nn.BatchNorm1d(config.output_dim, affine=False)
 
@@ -64,6 +64,9 @@ class GATON(nn.Module):
         h_item3 = self.conv2_seq_item.forward((h_seq2, h_item2), edge_index)
         h_seq3 = self.conv2_item_seq.forward(
             (h_item2, h_seq2), swapped_edge_index)
+
+        h_item3 = F.relu(h_item3)
+        h_seq3 = F.relu(h_seq3)
 
         h_item3 = self.batch_norm2.forward(h_item3)
         h_seq3 = self.batch_norm2.forward(h_seq3)
