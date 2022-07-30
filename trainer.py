@@ -16,7 +16,6 @@ class Trainer():
         graph_data: BipartiteGraphData,
         config: Config
     ):
-        # torch.autograd.set_detect_anomaly(True)
         r'''
         Args:
             graph_data: bipartite graphdata of graph structure
@@ -36,7 +35,7 @@ class Trainer():
         elif self.config.task == 'classification':
             self.loss_f = self.loss_classification
         else:
-            Exception
+            assert False, f'config.task = {self.config.task} is invalid.'
 
         self.target_labels = create_target_labels(
             self.graph_data.edge_index,
@@ -101,8 +100,9 @@ class Trainer():
         print('-' * 30)
         pred = F.softmax(torch.matmul(h_seq, h_item.T), dim=1)
         mat_size = len(h_seq) * len(h_item)
-        for i in range(10):
-            print(self.target_labels[0][i], pred[0][i])
+        for i in range(400):
+            if self.target_labels[0][i] > 0.1:
+                print(self.target_labels[0][i], pred[0][i])
         loss += torch.sum(torch.sqrt(
             (self.target_labels - pred) ** 2 + 1e-7)) / mat_size
         l2_norm = sum(p.pow(2.0).sum()

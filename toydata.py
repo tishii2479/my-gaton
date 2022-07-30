@@ -6,7 +6,7 @@ def create_toydata(num_topic: int):
     documents = []
     words = []
     key_words = [[] for _ in range(num_topic)]
-    data_size = 20
+    data_size = 10
 
     for _ in range(1, 201):
         s = ''
@@ -24,8 +24,8 @@ def create_toydata(num_topic: int):
             doc = []
             for _ in range(randint(30, 50)):
                 doc.append(choice(key_words[i]))
-            for _ in range(randint(150, 200)):
-                doc.append(choice(words))
+            # for _ in range(randint(150, 200)):
+            #     doc.append(choice(words))
             documents.append(doc)
 
     for i in range(num_topic):

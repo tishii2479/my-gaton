@@ -24,6 +24,7 @@ class Config:
     verbose = False
     task = 'topic-modeling'  # topic-modeling, classification
     dataset = 'toydata'
+    model = 'gaton'
 
 
 class Sequence:
