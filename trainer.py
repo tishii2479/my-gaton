@@ -95,13 +95,16 @@ class Trainer():
     ):
         r'''
         TODO: make loss function injectable
-        TODO: use better matrix calculation
+        Calc loss of each prediction
         '''
         loss = 0
         print('-' * 30)
-        pred = F.softmax(torch.matmul(h_seq, h_item.T), dim=0)
+        pred = F.softmax(torch.matmul(h_seq, h_item.T), dim=1)
+        mat_size = len(h_seq) * len(h_item)
+        for i in range(10):
+            print(self.target_labels[0][i], pred[0][i])
         loss += torch.sum(torch.sqrt(
-            (self.target_labels - pred) ** 2 + 1e-7))
+            (self.target_labels - pred) ** 2 + 1e-7)) / mat_size
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
         loss += self.config.l2_lambda * l2_norm
@@ -117,7 +120,8 @@ class Trainer():
         '''
         loss = 0
         print('*' * 30)
-        loss += F.cross_entropy(h_seq, self.graph_data.seq_labels)
+        pred = F.softmax(h_seq, dim=1)
+        loss += F.cross_entropy(pred, self.graph_data.seq_labels)
         l2_norm = sum(p.pow(2.0).sum()
                       for p in self.model.parameters())
         loss += self.config.l2_lambda * l2_norm
